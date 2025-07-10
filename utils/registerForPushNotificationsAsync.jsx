@@ -4,11 +4,12 @@ import * as Notifications from "expo-notifications";
 
 export default async function registerForPushNotificationsAsync() {
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "default",
+    await Notifications.setNotificationChannelAsync("taskNotify", {
+      name: "Task Notifier",
       importance: Notifications.AndroidImportance.DEFAULT,
       vibrationPattern: [0, 250, 250, 250],
       showBadge: false,
+      sound: 'notification.wav'
     });
   }
 

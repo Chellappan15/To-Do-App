@@ -8,7 +8,8 @@ import {
   StyleSheet,
   Keyboard,
   Modal,
-  Alert
+  Alert,
+  useColorScheme
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
@@ -20,17 +21,22 @@ import * as Haptics from 'expo-haptics';
 import * as Notifications from "expo-notifications";
 import { initializeNotifications } from '../utils/Notifications';
 import registerForPushNotificationsAsync from '../utils/registerForPushNotificationsAsync';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function App() {
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [taskDate, setTaskDate] = useState("");
+  const [mode, setMode] = useState('calendar');
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [todayDate, setTodayDate] = useState(new Date());
   const refer = useRef({});
   useEffect(() => {
     initializeNotifications();
     const fetchTasks = async () => {
       try {
-        // scheduleNotification();
         const storedTasks = await AsyncStorage.getItem('tasks');
         if (storedTasks !== null) {
           setTasks(JSON.parse(storedTasks));
@@ -42,17 +48,67 @@ export default function App() {
     
     fetchTasks();
   }, []);
+
+  const onChange = (event, selectedDate) => {
+    if(mode == 'calendar' && event.type == 'set')
+    {
+      setTaskDate(selectedDate);
+      setMode('time');
+    } 
+    else if(mode == 'calendar' && event.type == 'dismissed')
+    {
+      setShowCalendar(false);
+      setInput('');
+    }
+    else if (mode == 'time' && event.type == 'set')
+    {
+      const task = new Date(taskDate);
+      const selected = selectedDate;
+      const completionDate = new Date(
+        task.getFullYear(),
+        task.getMonth(),
+        task.getDate(),
+        selected.getHours(),
+        selected.getMinutes(),
+        selected.getSeconds(),
+        selected.getMilliseconds()
+      );
+      setMode('calendar');
+      setShowCalendar(false);
+      setInput("");
+      scheduleNotification({ id: new Date(), title: input, completed: false, completionDate: completionDate, scheduleNotificationDate: completionDate });
+      storeToMobile({ id: new Date(), title: input, completed: false, completionDate: completionDate });
+    }
+    else if (mode == 'time' && event.type == 'dismissed')
+    {
+      setMode('calendar');
+      setTaskDate("");
+      setShowCalendar(false);
+    }
+  };
+
+  const addTask = () => {
+    if (input.trim() === ''){
+      setInput('');  
+      return;
+    } 
+    else setShowCalendar(prev => !prev); setMode('calendar');
+    Keyboard.dismiss();
+  };
   
-  const scheduleNotification = async () => {
+  const scheduleNotification = async (Task) => {
     const result = await registerForPushNotificationsAsync();
-    console.log("Permission: ", result);
     if (result === "granted") {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "I'm a notification from your app! 📨",
+          title: Task ? Task.title : "Hi from one of your tasks today",
+          body: 'Your task is due',
+          sound: 'notification.wav'
         },
         trigger: {
-          seconds: 5,
+          channelId: 'taskNotify',
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: new Date(Task.scheduleNotificationDate)
         },
       });
     } else {
@@ -63,19 +119,12 @@ export default function App() {
     }
   }
   
-  const addTask = () => {
-    if (input.trim() === '') return;
-    setInput('');  
-    Keyboard.dismiss();
-    storeToMobile({ id: new Date(), title: input, completed: false });
-  };
   async function storeToMobile(task) {
+    task = { id: task.id, title: task.title, completed: task.completed, completionDate: task['completionDate'] }
     try{
       let allTasks = [...tasks, task];
       await AsyncStorage.setItem('tasks', JSON.stringify(allTasks));
-      setTasks([...tasks, { id: new Date(), title: input, completed: false }]);
-      setSuccess((prev) => !prev);
-      console.log(await AsyncStorage.getItem('tasks'));
+      setTasks(allTasks);
     }
     catch(err){
       console.error(err);
@@ -85,7 +134,7 @@ export default function App() {
   const completeTask = async (index) => {
     try {
       const updatedTasks = tasks.map((task, indexOfItem) =>
-        indexOfItem === index ? { ...task, completed: !task.completed, id: new Date() } : task
+        indexOfItem === index ? { ...task, completed: !task.completed, completedDate: new Date() } : task
       );
       await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -144,60 +193,64 @@ export default function App() {
           {item.title}
         </Text>
         {/* <Text>}</Text> */}
-        <Text style = {{color: 'white'}}>{item.completed ? "Completed On: " : "Created On: "}{
-        new Date(item['id']).toUTCString().replace('GMT','').split(" ").slice(0,4).join(" ")}{" "}
-        {new Date(item['id']).toLocaleString('en-IN', {
-          timeZone: 'Asia/Kolkata',
-        }).split(' ')[1]}
+        <Text style = {{color: 'white'}}>
+          Created On: {" "} 
+          {new Date(item['id']).toUTCString().replace('GMT','').split(" ").slice(0,4).join(" ")}{" "}
+          {new Date(item['id']).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+          }).split(' ')[1]}
+        </Text>
+        <Text style = {{color: 'white'}}>
+          {item.completed ? "Completed On: " : "To Be Completed On: "}
+          {new Date(item[item.completed ? 'completedDate' : 'completionDate']).toUTCString().replace('GMT','').split(" ").slice(0,4).join(" ")}{" "}
+          {new Date(item[item.completed ? 'completedDate' : 'completionDate']).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+          }).split(' ')[1]}
         </Text>
       </View>
     </Swipeable>
   );
 
   return (
-      <GestureHandlerRootView style = {{flex: 1}}>
-        <View style={styles.container}>
-          <Text style={styles.title}>📝 To-Do List</Text>
+    <GestureHandlerRootView style = {{flex: 1}}>
+      <View style={styles.container}>
+        <Text style={styles.title}>📝 To-Do List</Text>
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              value={input}
-              onChangeText={setInput}
-              placeholder="Add new task"
-              style={styles.input}
-            />
-            <TouchableOpacity onPress={addTask} style={styles.addButton}>
-              <Text style={styles.addButtonText}>＋</Text>
-            </TouchableOpacity>
-          </View>
-          <Button onPress={scheduleNotification} buttonColor='white'>Press me</Button>
-
-          <FlatList
-            showsVerticalScrollIndicator = {false}
-            data={tasks}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.list}
+        <View style={styles.inputContainer}>
+          <TextInput
+            value={input}
+            onChangeText={setInput}
+            placeholder="Add new task"
+            style={styles.input}
+            placeholderTextColor={isDarkMode ? '#888' : '#666'}
           />
+          <TouchableOpacity onPress={addTask} style={styles.addButton}>
+            <Text style={styles.addButtonText}>＋</Text>
+          </TouchableOpacity>
         </View>
-        {success && <Modal visible = {true}transparent = {true} animationType = 'fade'>
-                      <View style = {{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(128, 128, 128, 0.5)'}}>
-                        <Button 
-                          icon = {() => <Entypo name='thumbs-up' color='white' size={20}/>} 
-                          mode = 'contained' 
-                          buttonColor='#00C853' 
-                          onPress={() => setSuccess((prev) => !prev)}>Added Successfully
-                        </Button>
-                      </View>
-                    </Modal>}
-      </GestureHandlerRootView>
+
+        <FlatList
+          showsVerticalScrollIndicator = {false}
+          data={tasks}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.list}
+        />
+      </View>
+      {showCalendar && 
+        <DateTimePicker
+          value={new Date()}
+          mode={mode === 'calendar' ? 'date' : 'time'} // Change to 'time' or 'datetime' as needed
+          display={mode === 'calendar' ? 'calendar' : 'clock'} // Options: 'default', 'spinner', 'calendar', 'clock'
+          onChange={onChange} />
+      }
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#F9F9F9',
     paddingTop: 60,
     paddingHorizontal: 20,
     backgroundColor: '#1E1E2F'
@@ -222,7 +275,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 2,
     borderColor: 'black',
-    // borderWidth: 2
   },
   addButton: {
     backgroundColor: '#F28B82',
@@ -240,7 +292,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
     paddingBottom: 100,
     paddingTop: 2,
-    // backgroundColor: 'black'
   },
   renderLeftActions: {
     flex: 1,
