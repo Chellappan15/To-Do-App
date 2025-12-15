@@ -1,5 +1,5 @@
 const addNewTask = 'ADDTASK';
 const completeTask = 'COMPLETETASK';
-const deleteTask = "DELETETASK";
+const removeTask = "DELETETASK";
 const init = 'INIT';
-export { init, addNewTask, completeTask, deleteTask };
+export { init, addNewTask, completeTask, removeTask };

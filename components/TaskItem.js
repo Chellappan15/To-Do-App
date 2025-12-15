@@ -25,7 +25,7 @@ export default function TaskItem({ item, index }) {
             renderRightActions={() => <SwipeActions type="right" />}
             onSwipeableOpen={handleSwipe}
         >
-            <View style={styles.item}>
+            <View style={styles[item.priority]}>
                 <Text style={item.completed ? styles.completed : styles.text}>
                     {item.title}
                 </Text>
@@ -44,8 +44,41 @@ export default function TaskItem({ item, index }) {
 }
 
 const styles = StyleSheet.create({
-    item: { backgroundColor: '#0D1B2A', padding: 15, borderRadius: 10, marginBottom: 15, borderColor: '#3A86FF', borderWidth: 2 },
-    text: { fontSize: 16, color: '#F0F0F0' },
-    completed: { fontSize: 16, color: '#00BCD4', textDecorationLine: 'line-through' },
-    meta: { color: 'white', marginTop: 5 }
+    High: { 
+        backgroundColor: '#F44336', 
+        padding: 15, 
+        borderRadius: 10, 
+        marginBottom: 15, 
+        borderColor: '#ffffffff', 
+        borderWidth: 2 
+    },
+    Medium: {
+        backgroundColor: '#FFB300', 
+        padding: 15, 
+        borderRadius: 10, 
+        marginBottom: 15, 
+        borderColor: '#ffffffff', 
+        borderWidth: 2 
+    },
+    Low: {
+        backgroundColor: '#4CAF50', 
+        padding: 15, 
+        borderRadius: 10, 
+        marginBottom: 15, 
+        borderColor: '#ffffffff', 
+        borderWidth: 2 
+    },
+    text: { 
+        fontSize: 16, 
+        color: '#212121' 
+    },
+    completed: { 
+        fontSize: 16, 
+        color: '#00BCD4', 
+        textDecorationLine: 'line-through' 
+    },
+    meta: { 
+        color: '#212121',
+        marginTop: 5 
+    }
 });

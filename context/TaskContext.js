@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
-import { init, addNewTask } from '../constants/constants';
+import { init, addNewTask, completeTask, removeTask } from '../constants/constants';
 
 export const TaskContext = createContext();
 
@@ -17,6 +17,7 @@ export const TaskProvider = ({ children }) => {
         const stored = await AsyncStorage.getItem('tasks');
         if(stored) {
             setTasks(JSON.parse(stored));
+            console.log(JSON.parse(stored));
             Dispatch({type: init, payload: JSON.parse(stored)});
         }
     };
@@ -39,14 +40,17 @@ export const TaskProvider = ({ children }) => {
 
     const deleteTask = index => {
         const updated = tasks.filter((_, i) => i !== index);
+        Dispatch({type: removeTask, payload: index});
         saveTasks(updated);
     };
 
     const toggleComplete = index => {
+        const date = new Date().toISOString();
         const updated = tasks.map((task, i) =>
-            i === index ? { ...task, completed: !task.completed, completedDate: new Date() } : task
+            i === index ? { ...task, completed: !task.completed, completedDate: date } : task
         );
         saveTasks(updated);
+        Dispatch({type: completeTask, payload: index, date: date});
     };
 
     return (

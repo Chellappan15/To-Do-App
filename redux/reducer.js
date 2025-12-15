@@ -1,32 +1,37 @@
-import { addNewTask, deleteTask, init } from "../constants/constants";
+import { addNewTask, completeTask, deleteTask, init } from "../constants/constants";
 
 export default function Reducer(state = { tasks: [] }, action) {
     switch (action.type) {
         case init:
             return {
-                ...state,
                 tasks: action.payload
             };
 
         case addNewTask:
             return {
-                ...state,
                 tasks: [...state.tasks, action.payload]
             };
 
-        case deleteTask:
+        case removeTask:
             return {
-                ...state,
                 tasks: state.tasks.filter((_, i) => i !== action.payload)
             };
 
+        case completeTask:
+            const updated = state.tasks.map((task, i) =>
+                i === action.payload ? { ...task, completed: !task.completed, completedDate: action.date } : task
+            );
+            return {
+                tasks: updated
+            }
+
         case 'reset':
             return {
-                ...state,
                 tasks: []
             };
 
         default:
+            console.log('From reducer: ', state);
             return state;
     }
 }
