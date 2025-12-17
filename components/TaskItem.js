@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     },
     completed: { 
         fontSize: 16, 
-        color: '#00BCD4', 
+        color: '#212121', 
         textDecorationLine: 'line-through' 
     },
     meta: { 

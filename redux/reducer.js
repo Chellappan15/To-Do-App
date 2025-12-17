@@ -1,4 +1,4 @@
-import { addNewTask, completeTask, deleteTask, init } from "../constants/constants";
+import { addNewTask, completeTask, removeTask, init } from "../constants/constants";
 
 export default function Reducer(state = { tasks: [] }, action) {
     switch (action.type) {
