@@ -25,7 +25,7 @@ const scheduleNotification = async (Task) => {
             trigger: {
                 channelId: 'taskNotify',
                 type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: new Date(Task.scheduleNotificationDate)
+                date: new Date(Task.completionDate)
             },
         });
     } else {

@@ -17,7 +17,6 @@ export const TaskProvider = ({ children }) => {
         const stored = await AsyncStorage.getItem('tasks');
         if(stored) {
             setTasks(JSON.parse(stored));
-            console.log(JSON.parse(stored));
             Dispatch({type: init, payload: JSON.parse(stored)});
         }
     };

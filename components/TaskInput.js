@@ -100,6 +100,7 @@ export default function TaskInput() {
                             value={input}
                             onChangeText={setInput}
                             placeholder="What's on your mind?"
+                            placeholderTextColor="#888"
                             style={{
                                 width: 250,
                                 borderRadius: 10,
@@ -178,7 +179,8 @@ const styles = StyleSheet.create({
         width: 150, 
         borderWidth: "20px",
         borderColor: 'white',
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        color: 'black'
     },
     buttonRow: {
         marginTop: 10, 

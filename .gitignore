@@ -3,6 +3,8 @@
 # dependencies
 node_modules/
 
+# Apks
+.android/app/build/outputs
 # Expo
 .expo/
 dist/

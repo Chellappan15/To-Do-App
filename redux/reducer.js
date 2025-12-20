@@ -31,7 +31,6 @@ export default function Reducer(state = { tasks: [] }, action) {
             };
 
         default:
-            console.log('From reducer: ', state);
             return state;
     }
 }
