@@ -57,8 +57,8 @@ export default function TaskInput() {
                 completionDate: finalDate,
                 priority: taskPriority
             };
-            addTask(newTask);
-            scheduleNotification(newTask);
+            const notificationIdentifier = scheduleNotification(newTask);
+            addTask(newTask, notificationIdentifier);
 
             setInput('');
             setTaskPriority('Low');

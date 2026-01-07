@@ -16,7 +16,7 @@ const initializeNotifications = async () => {
 const scheduleNotification = async (Task) => {
     const result = await registerForPushNotificationsAsync();
     if (result === "granted") {
-        await Notifications.scheduleNotificationAsync({
+        const identifier = await Notifications.scheduleNotificationAsync({
             content: {
                 title: Task ? Task.title : "Hi from one of your tasks today",
                 body: 'Your task is due',
@@ -24,10 +24,11 @@ const scheduleNotification = async (Task) => {
             },
             trigger: {
                 channelId: 'taskNotify',
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                // type: Notifications.SchedulableTriggerInputTypes.DATE,
                 date: new Date(Task.completionDate)
             },
         });
+        return identifier
     } else {
         Alert.alert(
             "Unable to schedule notification",
@@ -36,4 +37,8 @@ const scheduleNotification = async (Task) => {
     }
 }
 
-export {scheduleNotification, initializeNotifications};
+const cancelScheduledNotification = async (identifier) => {
+    const cancel = await Notifications.cancelScheduledNotificationAsync(identifier);
+}
+
+export {scheduleNotification, cancelScheduledNotification, initializeNotifications};

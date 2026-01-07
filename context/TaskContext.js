@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { init, addNewTask, completeTask, removeTask } from '../constants/constants';
+import { cancelScheduledNotification } from '../utils/Notifications';
 
 export const TaskContext = createContext();
 
@@ -26,11 +27,12 @@ export const TaskProvider = ({ children }) => {
         await AsyncStorage.setItem('tasks', JSON.stringify(updated));
     };
 
-    const addTask = task => {
+    const addTask = (task, notificationIdentifier) => {
         const updatedTask = {
             ...task,
             completedDate: task.completedDate ? task.completedDate.toISOString() : null,
-            completionDate: task.completionDate ? task.completionDate.toISOString() : null
+            completionDate: task.completionDate ? task.completionDate.toISOString() : null,
+            notificationIdentifier: String(notificationIdentifier)
         };
 
         saveTasks([...tasks, updatedTask]);
@@ -38,7 +40,9 @@ export const TaskProvider = ({ children }) => {
     };
 
     const deleteTask = index => {
+        const task = tasks.filter((_, i) => i === index);
         const updated = tasks.filter((_, i) => i !== index);
+        cancelScheduledNotification(task.notificationIdentifier);
         Dispatch({type: removeTask, payload: index});
         saveTasks(updated);
     };
