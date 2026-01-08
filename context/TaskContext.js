@@ -39,21 +39,21 @@ export const TaskProvider = ({ children }) => {
         Dispatch({ type: addNewTask, payload: updatedTask });
     };
 
-    const deleteTask = index => {
-        const task = tasks.filter((_, i) => i === index);
-        const updated = tasks.filter((_, i) => i !== index);
+    const deleteTask = id => {
+        const task = tasks.filter((_, i) => _.id === id);
+        const updated = tasks.filter((_, i) => _.id !== id);
         cancelScheduledNotification(task.notificationIdentifier);
-        Dispatch({type: removeTask, payload: index});
+        Dispatch({type: removeTask, payload: id});
         saveTasks(updated);
     };
 
-    const toggleComplete = index => {
+    const toggleComplete = id => {
         const date = new Date().toISOString();
         const updated = tasks.map((task, i) =>
-            i === index ? { ...task, completed: !task.completed, completedDate: date } : task
+            task.id === id ? { ...task, completed: !task.completed, completedDate: date } : task
         );
         saveTasks(updated);
-        Dispatch({type: completeTask, payload: index, date: date});
+        Dispatch({type: completeTask, payload: id, date: date});
     };
 
     return (

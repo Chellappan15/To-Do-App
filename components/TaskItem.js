@@ -11,9 +11,9 @@ export default function TaskItem({ item, index }) {
 
     const handleSwipe = direction => {
         if (direction === 'left') {
-            toggleComplete(index);
+            toggleComplete(item.id);
             ref.current.close();
-        } else deleteTask(index);
+        } else deleteTask(item.id);
     };
 
     return (

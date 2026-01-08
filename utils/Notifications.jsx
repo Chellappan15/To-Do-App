@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import registerForPushNotificationsAsync from "./registerForPushNotificationsAsync.jsx";
+import { Linking } from 'react-native';
 
 const initializeNotifications = async () => {
   console.log('Init');
@@ -24,16 +25,13 @@ const scheduleNotification = async (Task) => {
             },
             trigger: {
                 channelId: 'taskNotify',
-                // type: Notifications.SchedulableTriggerInputTypes.DATE,
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
                 date: new Date(Task.completionDate)
             },
         });
-        return identifier
-    } else {
-        Alert.alert(
-            "Unable to schedule notification",
-            "Enable the notifications permission for Expo Go in settings",
-        );
+        return identifier;
+    } else if (result !== 'granted'){
+        return false;
     }
 }
 

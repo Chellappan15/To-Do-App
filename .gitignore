@@ -4,7 +4,7 @@
 node_modules/
 
 # Apks
-.android/app/build/outputs
+/android
 # Expo
 .expo/
 dist/

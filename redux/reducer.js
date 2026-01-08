@@ -14,12 +14,12 @@ export default function Reducer(state = { tasks: [] }, action) {
 
         case removeTask:
             return {
-                tasks: state.tasks.filter((_, i) => i !== action.payload)
+                tasks: state.tasks.filter((_, i) => _.id !== action.payload)
             };
 
         case completeTask:
             const updated = state.tasks.map((task, i) =>
-                i === action.payload ? { ...task, completed: !task.completed, completedDate: action.date } : task
+                task.id === action.payload ? { ...task, completed: !task.completed, completedDate: action.date } : task
             );
             return {
                 tasks: updated

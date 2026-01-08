@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, TextInput, TouchableOpacity, Text, Keyboard, Modal, StyleSheet } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, Keyboard, Modal, StyleSheet, Alert, Linking } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TaskContext } from '../context/TaskContext';
@@ -22,8 +22,16 @@ export default function TaskInput() {
         setMode('date');
         Keyboard.dismiss();
     };
+    
+    const reset = () => {
+        setInput('');
+        setTaskPriority('Low');
+        setShow(false);
+        setMode('date');
+        setTaskDate(null);
+    }
 
-    const onChange = (event, selected) => {
+    const onChange = async(event, selected) => {
         if (!selected) {
             setShow(false);
             return;
@@ -57,14 +65,19 @@ export default function TaskInput() {
                 completionDate: finalDate,
                 priority: taskPriority
             };
-            const notificationIdentifier = scheduleNotification(newTask);
+            const notificationIdentifier = await scheduleNotification(newTask);
+            if (!notificationIdentifier) {
+                reset();
+                Alert.alert(
+                    "Unable to schedule notification", 
+                    "Enable permission in settings", [
+                        { text: "OK", onPress: () => Linking.openSettings() }
+                    ]
+                );
+                return ;
+            }
             addTask(newTask, notificationIdentifier);
-
-            setInput('');
-            setTaskPriority('Low');
-            setShow(false);
-            setMode('date');
-            setTaskDate(null);
+            reset();
         }
     };
 
