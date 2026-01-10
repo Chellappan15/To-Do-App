@@ -1,8 +1,10 @@
-# Welcome to your Expo app 👋
+# Welcome to my react native study series project 1 The most famous starter project THE TODO APP 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
 ## Get started
+
+1. Clone this repo 
 
 1. Install dependencies
 
